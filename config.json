@@ -2,5 +2,7 @@
 	"verbose": false,
 	"hardcoded": true,
 	"harcoded_exts": [".c", ".h"],
-	"dirs_paths" : ["/root/Documents/binFucker/dnstracer-1.8", "/root/poc"]
+	"dirs_paths" : ["/tmp"],
+	"make" : false,
+	"gcc" : ""
 }

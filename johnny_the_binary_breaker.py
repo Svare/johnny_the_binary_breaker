@@ -12,7 +12,6 @@ def get_config_json_dict(json_config_file):
     with open(argv[1], 'r') as config_file:
         return json.load(config_file)
 
-
 def get_files_names(json_config):
 
     files_names = []
@@ -36,6 +35,8 @@ def get_files_names(json_config):
 
 def get_harcoded_data(files, json_config):
 
+    MAX_INT = 0
+
     regular_expressions = [
         re.compile(r'char\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*(?:\d*|(?:[a-zA-Z_][a-zA-Z0-9_]*))?\s*\]\s*=\s*".*"\s*;'), #char name[] = "";
         re.compile(r'char\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*ñ\s*=\s*{.*}\s*;'), #char name[] = {};
@@ -47,6 +48,13 @@ def get_harcoded_data(files, json_config):
         re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*[-+]?[0-9]*[.]?[0-9]+([eE][-+]?[0-9]+)?\s*;'), #Igualaciones float, double
         re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)\s*= *[^\s;]+ *;') #Cualquier tipo de igualacion
     ]
+
+    integers = [
+        re.compile(r'#define\s+(?:[a-zA-Z_][a-zA-Z0-9_]*)\s+([0-9]+)\s*'),
+        re.compile(r'(?:[a-zA-Z_][a-zA-Z0-9_]*)\s*\=\s*([0-9]+)\s*[,;]')
+    ]
+
+    main = r = re.compile('main\s*\(\s*.*char\s*(?:\*\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*\]|\*\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*))[^)]*\)')
     
     log = {}
     
@@ -57,14 +65,37 @@ def get_harcoded_data(files, json_config):
         with open(file_abs_name, 'r') as current_file:
             i = 1
             for line in current_file.readlines():
-                for regex in regular_expressions:
-                    result = re.search(regex, line)
-                    if result is not None:
-                        log[file_abs_name].append((i, result.group()))
+                # for regex in regular_expressions:
+                #     result = re.search(regex, line)
+                #     if result is not None:
+                #         log[file_abs_name].append((i, result.group()))
+                #         break
+                
+                # Obtencion del valor entero maximo.
+
+                for regex in integers:
+
+                    while '"' in line:
+                        line = line[:line.index('"')] + line[line.index('"', int(line.index('"') + 1)) + 1 :]
+
+                    result = re.findall(regex, line)
+
+                    if result:
+                        for value in result:
+                            print(value) # Verbose
+                            MAX_INT = int(value) if (int(value) > MAX_INT) else MAX_INT
                         break
+                
+                # Obtencion del nombre de los argumentos pasados por linea de comandos 
+                
+                result = re.search(main, line)
+
+                if result is not None:
+                    main_arg = result.groups()[0] if (result.groups()[0] is not None) else result.groups()[1]
+
                 i+=1
     
-    return log
+    return log, MAX_INT, main_arg
 
 def print_harcoded_data(log):
 
@@ -79,5 +110,7 @@ if __name__ == "__main__":
 
     json_config = get_config_json_dict(argv[1])
     files_names = get_files_names(json_config)
-    harcoded_data_dict = get_harcoded_data(files_names, json_config)
+    harcoded_data_dict, MAX_INT, main_arg = get_harcoded_data(files_names, json_config)
     print_harcoded_data(harcoded_data_dict)
+
+    print(MAX_INT, main_arg)
