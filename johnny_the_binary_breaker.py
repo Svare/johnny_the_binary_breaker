@@ -99,7 +99,7 @@ def get_harcoded_data(files, json_config):
 
 def print_harcoded_data(log):
 
-    for key,value in log.items():
+    for key, value in log.items():
         print('\n' + key + '\n')
         for harcoded_item in value:
             print('\t{0:>8}\t{1}'.format(str(harcoded_item[0]), harcoded_item[1]))
