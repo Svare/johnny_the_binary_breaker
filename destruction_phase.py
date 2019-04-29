@@ -6,6 +6,7 @@ import sys
 time_out = 0.1
 dict_of_bkpnts = {}
 ascii_character = '0'
+last = '2'
 
 #ejecuta gdb
 def exec_gdb(file_name):
@@ -52,6 +53,10 @@ def break_it(gdb):
         resp = gdb.recvlines(timeout=time_out)
         #print_stdout(resp)
         #print('Enviado a identif --->  '+resp[0].decode('utf-8') )
+        #print('----------------------------------------------------------')
+        #print_stdout(resp)
+        #print('----------------------------------------------------------')
+
         if detect_buffer_overflow(resp):
             return resp
         bk = resp[2].decode('utf-8').split()[1].replace(',','')
@@ -71,6 +76,7 @@ def break_it(gdb):
         mem = get_memory_address(resp[0].decode('utf-8'))
         #print(mem)
         dict_of_bkpnts[bk].extend((identif,mem, origin, valuee))
+        last = bk
     return False
 
 def set_argvs(letters_list, argv_len, gdb):
@@ -102,7 +108,7 @@ def destruction_phase(executable, functs_dict):
     gdb.sendline('b main')
     gdb.recvlines(timeout=time_out)
 
-    set_argvs(['a', 'b', 'c'], 500, gdb) # Especificando argvs
+    set_argvs(['a', 'b', 'c'], 900, gdb) # Especificando argvs
 
     set_breakpoints(gdb, functs_dict)
 
@@ -111,6 +117,7 @@ def destruction_phase(executable, functs_dict):
     gdb.recvlines(timeout=time_out)
 
     resp = break_it(gdb)
+
     if not resp:
         gdb.sendline('c')
         resp = gdb.recvlines(timeout=time_out)
@@ -118,14 +125,15 @@ def destruction_phase(executable, functs_dict):
             print("El programa no es vulnerable")
             sys.exit(0)
 
-    resp = resp[-1].decode('utf-8').split()[0]
 
-    print('Rompio con la direccion ' + resp)
 
     gdb.close()
 
+    return dict_of_bkpnts[last]
+
 
 if __name__ == '__main__':
-    d = {'main': [('strcpy', '+25')]}
-    destruction_phase('../x.out',d)
-    print(dict_of_bkpnts)
+    d = {'main': [('strcpy', '+25'), ('strcpy', '+49'), ('strcpy', '+73'), ('strcpy', '+97'), ('strcpy', '+121')]}
+    print(destruction_phase('../x.out',d))
+    #print('Va')
+    #print(dict_of_bkpnts)
