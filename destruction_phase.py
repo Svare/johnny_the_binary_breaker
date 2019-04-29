@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 from pwn import *
+from functools import reduce
 
 time_out = 0.1
 dict_of_bkpnts = {}
@@ -37,6 +38,20 @@ def break_it(gdb):
             gdb.sendline(x*9)
             print_stdout(gdb.recvlines(timeout=time_out))
 
+def set_argvs(letters_list, argv_len, gdb):
+    
+    # letters_list = ['a', 'b', 'c']
+    # argv_len = 5
+
+    argvs = 'r' + reduce(lambda x,y: x + y, map(lambda x: ' ' + x*argv_len, letters_list))
+
+    # argvs generaria 'r aaaaa bbbbb ccccc'
+
+    ascii_character = chr(ord(letters_list[-1]) + 1)
+    
+    gdb.sendline(argvs)
+    gdb.recvlines(timeout=time_out)
+
 
 #funcion general que realiza la fase de destruccion
 def destruction_phase(executable, functs_dict):
@@ -51,6 +66,8 @@ def destruction_phase(executable, functs_dict):
 
     gdb.sendline('b main')
     gdb.recvlines(timeout=time_out)
+
+    set_argvs(['a', 'b', 'c'], 10, gdb) # Especificando argvs
 
     set_breakpoints(gdb, functs_dict)
 
