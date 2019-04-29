@@ -1,8 +1,10 @@
 {
-	"verbose": false,
-	"hardcoded": true,
+	"verbose": true,
+	"hardcoded": false,
 	"harcoded_exts": [".c", ".h"],
-	"dirs_paths" : ["/tmp"],
-	"make" : false,
-	"gcc" : ""
+	"dirs_paths" : ["/root/poc/dnstracer"],
+	"main_file" : "/root/Documents/binFucker/dnstracer-1.8/dnstracer.c",
+	"make_path" : null,
+	"gcc_main_path" : null,
+	"binary_path" : null
 }

@@ -60,7 +60,6 @@ def run_recognition_phase(executable, funtions_dict):
         gdb.recvlines(timeout=time_out)
         #print_stdout(gdb.recvlines(timeout=0.2))
 
-
         gdb.sendline('set height unlimited')
         gdb.recvlines(timeout=time_out)
 
@@ -79,8 +78,9 @@ def run_recognition_phase(executable, funtions_dict):
 
         map_functions(gdb, funtions_dict)
 
-
         gdb.close()
+
+        return asm_funct_call
 
 if __name__ == '__main__':
     d = {'r':[], 'main':[]}
