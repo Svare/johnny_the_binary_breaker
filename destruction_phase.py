@@ -17,23 +17,39 @@ def print_stdout(lines):
 
 #anade breakpoint a todas las posibles funciones vulnerables
 def set_breakpoints(gdb, functs_dict):
-    n_brk = 1
+    n_brk = 2
     for key in functs_dict.keys():
         for brk in functs_dict[key]:
             #print('b *main{}'.format(brk[1]))
-            gdb.sendline('b *main{}'.format(brk[1]))
+            gdb.sendline('b *{}{}'.format(key,brk[1]))
             line = gdb.recvlines(timeout=time_out)[0].decode('utf-8')
             line = line.split()[-1]
             #print_stdout(gdb.recvlines(timeout=time_out))
             dict_of_bkpnts[str(n_brk)] = [key,brk[1],brk[0],line]
             n_brk += 1
 
+def get_destination_var(string):
+    return string[string.find('(')+1:string.rfind(')')].split(',')[0].strip()
+
+def get_memory_address(string):
+    return string.strip().split()[-1]
+
 def break_it(gdb):
     for i in range(1,len(dict_of_bkpnts)+1):
-        print('c')
         gdb.sendline('c')
-        print_stdout(gdb.recvlines(timeout=time_out))
-
+        resp = gdb.recvlines(timeout=0.3)
+        #print_stdout(resp)
+        #print('Enviado a identif --->  '+resp[0].decode('utf-8') )
+        bk = resp[2].decode('utf-8').split()[1].replace(',','')
+        #print("Break -->  " + bk )
+        identif = get_destination_var(resp[3].decode('utf-8'))
+        #print("Identificador " + identif)
+        gdb.sendline('p &{}'.format(identif))
+        resp = gdb.recvlines(timeout=time_out)
+        #print_stdout(resp)
+        mem = get_memory_address(resp[0].decode('utf-8'))
+        #print(mem)
+        dict_of_bkpnts[bk].extend((identif,mem))
 
 def set_argvs(letters_list, argv_len, gdb):
 
@@ -69,13 +85,15 @@ def destruction_phase(executable, functs_dict):
     set_breakpoints(gdb, functs_dict)
 
     gdb.sendline('run')
-    print_stdout(gdb.recvlines(timeout=time_out))
+    #print_stdout(gdb.recvlines(timeout=time_out))
+    gdb.recvlines(timeout=time_out)
 
+    break_it(gdb)
 
     gdb.close()
 
 
 if __name__ == '__main__':
-    d = {'r': [], 'main': [('scanf', '+35'), ('strcpy', '+51'), ('gets', '+76'), ('strncpy', '+94')]}
+    d = {'main': [('strcpy', '+25')]}
     destruction_phase('../x.out',d)
     print(dict_of_bkpnts)

@@ -84,6 +84,6 @@ def run_recognition_phase(executable, funtions_dict):
         return asm_funct_call
 
 if __name__ == '__main__':
-    d = {'r':[], 'main':[]}
+    d = {'main':[]}
     run_recognition_phase('../x.out', d)
     print(asm_funct_call)
