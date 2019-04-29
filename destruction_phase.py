@@ -32,13 +32,16 @@ def set_breakpoints(gdb, functs_dict):
 def get_destination_var(string):
     return string[string.find('(')+1:string.rfind(')')].split(',')[0].strip()
 
+def get_origin_var(string):
+    return string[string.find('(')+1:string.rfind(')')].split(',')[1].strip()
+
 def get_memory_address(string):
     return string.strip().split()[-1]
 
 def detect_buffer_overflow(lines):
     for line in lines:
         line = line.decode('utf-8')
-        print('----- >' + line)
+        #print('----- >' + line)
         if 'Segmentation fault' in line:
             return True
     return False
@@ -54,13 +57,20 @@ def break_it(gdb):
         bk = resp[2].decode('utf-8').split()[1].replace(',','')
         #print("Break -->  " + bk )
         identif = get_destination_var(resp[3].decode('utf-8'))
+        origin = get_origin_var(resp[3].decode('utf-8'))
         #print("Identificador " + identif)
+        #print(origin)
+        gdb.sendline('x/x {}'.format(origin))
+        resp = gdb.recvlines(timeout=time_out)
+        #print_stdout(resp)
+        valuee = resp[0].decode('utf-8').split()[2]
+        #print(valuee)
         gdb.sendline('p &{}'.format(identif))
         resp = gdb.recvlines(timeout=time_out)
         #print_stdout(resp)
         mem = get_memory_address(resp[0].decode('utf-8'))
         #print(mem)
-        dict_of_bkpnts[bk].extend((identif,mem))
+        dict_of_bkpnts[bk].extend((identif,mem, origin, valuee))
     return False
 
 def set_argvs(letters_list, argv_len, gdb):
