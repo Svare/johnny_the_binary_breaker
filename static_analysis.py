@@ -54,7 +54,7 @@ def get_harcoded_data(files, json_config):
         re.compile(r'(?:[a-zA-Z_][a-zA-Z0-9_]*)\s*\=\s*([0-9]+)\s*[,;]')
     ]
 
-    main = re.compile('main\s*\(\s*.*char\s*(?:\*\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*\]|\*\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*))[^)]*\)')
+    # main = re.compile('main\s*\(\s*.*char\s*(?:\*\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*\]|\*\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*))[^)]*\)')
     
     log = {}
     
@@ -87,16 +87,30 @@ def get_harcoded_data(files, json_config):
                             MAX_INT = int(value) if (int(value) > MAX_INT) else MAX_INT
                         break
                 
-                # Obtencion del nombre de los argumentos pasados por linea de comandos 
+                # # Obtencion del nombre de los argumentos pasados por linea de comandos 
                 
-                result = re.search(main, line)
+                # result = re.search(main, line)
 
-                if result is not None:
-                    main_arg = result.groups()[0] if (result.groups()[0] is not None) else result.groups()[1]
+                # if result is not None:
+                #     main_arg = result.groups()[0] if (result.groups()[0] is not None) else result.groups()[1]
 
                 i+=1
     
-    return log, MAX_INT, main_arg
+    return log, MAX_INT
+
+def get_main_arg(file_chars):
+
+    # Obtencion del nombre de los argumentos pasados por linea de comandos
+
+    main = re.compile('main\s*\(\s*.*char\s*(?:\*\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*\]|\*\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*))[^)]*\)')
+    result = re.search(main, file_chars)
+
+    if result is not None:
+        main_arg = result.groups()[0] if (result.groups()[0] is not None) else result.groups()[1]
+    else:
+        main_arg = 'argv'
+    
+    return main_arg
 
 def print_harcoded_data(log):
 

@@ -25,12 +25,11 @@ if __name__ == "__main__":
     # harcoded_data_dic: Diccionario con los valores harcodeados.
     # MAX_INT: El numero entero maximo encontrado en los archivos.
     # main_arg: nombre del arreglo que se le pasa al main
-
-    harcoded_data_dict, MAX_INT, main_arg = static_analysis.get_harcoded_data(files_names, json_config) # Se buscan valores harcodedados
     
     # Se imprimen los valores harcodeados
 
     if json_config['hardcoded']:
+        harcoded_data_dict, MAX_INT = static_analysis.get_harcoded_data(files_names, json_config)
         static_analysis.print_harcoded_data(harcoded_data_dict)
     
     # Obtencion de llamadas a funciones dentro de cada funcion con sus respectivos parametros
@@ -44,22 +43,30 @@ if __name__ == "__main__":
     
     buffer_overflow_func_catalog = functions_sweeper.get_buffer_overflow_funcs(d2)
 
-    ##### Generacion del Binario (compile | make_program) #####
+    # Se buscan y se imprimen las funciones vulnerables, las criticas estan acompañandas de un comentario
 
-    if json_config['gcc_main_path'] is not None:
-        compile.compile_file(json_config['gcc_main_path'])
-    elif json_config['make_path'] is not None:
-        make_program.do_make(json_config['make_path'])
+    functions_sweeper.get_vulnerable_funcs(d2, static_analysis.get_main_arg(file_chars))
+
+    # ##### Generacion del Binario (compile | make_program) #####
+
+    # if json_config['gcc_main_path'] is not None:
+    #     compile.compile_file(json_config['gcc_main_path'])
+    # elif json_config['make_path'] is not None:
+    #     make_program.do_make(json_config['make_path'])
     
-    ##### recognition_phase #####
+    # ##### recognition_phase #####
 
-    if json_config['binary_path'] is not None:
-        recognition_phase.run_recognition_phase(json_config['binary_path'], buffer_overflow_func_catalog)
-        print(recognition_phase.asm_funct_call)
+    # if json_config['binary_path'] is not None:
+    #     recognition_phase.run_recognition_phase(json_config['binary_path'], buffer_overflow_func_catalog)
+        
+    #     print('\nDiccionario Ensamblador\n')
+    #     print(recognition_phase.asm_funct_call)
+    #     print('\nDiccionario Fuente\n')
+    #     print(buffer_overflow_func_catalog)
     
-    ##### Comparacion #####
+    # ##### Comparacion #####
 
-    if buffer_overflow_func_catalog and recognition_phase.asm_funct_call: # Si los diccionarios no estan vacios
-        print(compare_recognition.compare_dicts(buffer_overflow_func_catalog, recognition_phase.asm_funct_call))
+    # if buffer_overflow_func_catalog and recognition_phase.asm_funct_call: # Si los diccionarios no estan vacios
+    #     print(compare_recognition.compare_dicts(buffer_overflow_func_catalog, recognition_phase.asm_funct_call))
 
     #print(MAX_INT, main_arg)

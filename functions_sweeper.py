@@ -179,6 +179,44 @@ def get_buffer_overflow_funcs(functions_calls_per_function):
     
     return buffer_overflow_candidates
 
+def get_vulnerable_funcs(functions_calls_per_function, main_arg):
+
+    report = ''
+    vulnerable = ('scanf', 'gets', 'strcpy', 'strncpy', 'printf')
+    var_name = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)')
+
+    for func, calls_list in functions_calls_per_function.items():
+
+        print('Funcion: ' + func)
+        print('\n\t\tLlamadas Vulnerables: \n')
+        report += 'Funcion' + func + '\n\t\tFunciones Vulnerables: '
+        
+        for name, args in calls_list:
+            if name.startswith(vulnerable) and name.endswith(vulnerable):
+                print('\t\t\t', name, args)
+                if name == 'strcpy':
+                    if len(args) == 2 and main_arg in args[1]:
+                        print('\n\t\t\t\t*********************************')
+                        print('\t\t\t\t*** This is Very Risky Dog ******')
+                        print('\t\t\t\t*********************************')
+                        print('\t\t\t\t*** Potential Buffer Overflow ***')
+                        print('\t\t\t\t*********************************\n')
+                elif name == 'gets':
+                    if len(args) == 1 and re.match(var_name, args[0]) is not None:
+                        print('\n\t\t\t\t*********************************')
+                        print('\t\t\t\t*** This is Very Risky Dog ******')
+                        print('\t\t\t\t*********************************')
+                        print('\t\t\t\t*** Potential Buffer Overflow ***')
+                        print('\t\t\t\t*********************************\n')
+                elif name == 'printf':
+                    if len(args) == 1 and re.match(var_name, args[0]) is not None:
+                        print('\n\t\t\t\t*********************************')
+                        print('\t\t\t\t*** This is Very Risky Dog ******')
+                        print('\t\t\t\t*********************************')
+                        print('\t\t\t\t*** Potential Format String *****')
+                        print('\t\t\t\t*********************************\n')
+        print()
+
 if __name__ == "__main__":
 
     with open(argv[1], 'r') as archivo:
