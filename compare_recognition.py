@@ -16,14 +16,16 @@ def compare_dicts(dict1, dict2):
         print_error()
 
     for key in keys1:
-        if len(dict1[key]) != len(dict2[key]):
-            print_error()
+        if (len(dict1[key]) != len(dict2[key])) or len(dict1[key]) == 0 or len(dict2[key]) == 0:
+            del dict1[key]
+            del dict2[key]
+            continue
 
         for i in range(len(dict1[key])):
             if dict1[key][i] != dict2[key][i][0]:
                 print_error()
 
-    return True
+    return (dict1,dict2)
 
 if __name__ == '__main__':
     d1 = {'r':[],'main':['strcpy','strcpy','gets','scanf']}
