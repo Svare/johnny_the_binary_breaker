@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 from pwn import *
 from functools import reduce
+import sys
 
 time_out = 0.1
 dict_of_bkpnts = {}
@@ -34,12 +35,22 @@ def get_destination_var(string):
 def get_memory_address(string):
     return string.strip().split()[-1]
 
+def detect_buffer_overflow(lines):
+    for line in lines:
+        line = line.decode('utf-8')
+        print('----- >' + line)
+        if 'Segmentation fault' in line:
+            return True
+    return False
+
 def break_it(gdb):
-    for i in range(1,len(dict_of_bkpnts)+1):
+    for i in dict_of_bkpnts.keys():
         gdb.sendline('c')
-        resp = gdb.recvlines(timeout=0.3)
+        resp = gdb.recvlines(timeout=time_out)
         #print_stdout(resp)
         #print('Enviado a identif --->  '+resp[0].decode('utf-8') )
+        if detect_buffer_overflow(resp):
+            return resp
         bk = resp[2].decode('utf-8').split()[1].replace(',','')
         #print("Break -->  " + bk )
         identif = get_destination_var(resp[3].decode('utf-8'))
@@ -50,6 +61,7 @@ def break_it(gdb):
         mem = get_memory_address(resp[0].decode('utf-8'))
         #print(mem)
         dict_of_bkpnts[bk].extend((identif,mem))
+    return False
 
 def set_argvs(letters_list, argv_len, gdb):
 
@@ -80,7 +92,7 @@ def destruction_phase(executable, functs_dict):
     gdb.sendline('b main')
     gdb.recvlines(timeout=time_out)
 
-    set_argvs(['a', 'b', 'c'], 10, gdb) # Especificando argvs
+    set_argvs(['a', 'b', 'c'], 500, gdb) # Especificando argvs
 
     set_breakpoints(gdb, functs_dict)
 
@@ -88,7 +100,17 @@ def destruction_phase(executable, functs_dict):
     #print_stdout(gdb.recvlines(timeout=time_out))
     gdb.recvlines(timeout=time_out)
 
-    break_it(gdb)
+    resp = break_it(gdb)
+    if not resp:
+        gdb.sendline('c')
+        resp = gdb.recvlines(timeout=time_out)
+        if not detect_buffer_overflow(resp):
+            print("El programa no es vulnerable")
+            sys.exit(0)
+
+    resp = resp[-1].decode('utf-8').split()[0]
+
+    print('Rompio con la direccion ' + resp)
 
     gdb.close()
 
