@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 from pwn import *
 
-functs_vulns =['gets','strcpy','scanf','strncpy']
+#functs_vulns =['gets','strcpy','scanf','strncpy']
+functs_vulns =['strcpy']
 asm_funct_call = {}
 time_out = 0.1
 
