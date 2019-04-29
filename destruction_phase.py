@@ -39,7 +39,7 @@ def break_it(gdb):
             print_stdout(gdb.recvlines(timeout=time_out))
 
 def set_argvs(letters_list, argv_len, gdb):
-    
+
     # letters_list = ['a', 'b', 'c']
     # argv_len = 5
 
@@ -48,7 +48,7 @@ def set_argvs(letters_list, argv_len, gdb):
     # argvs generaria 'r aaaaa bbbbb ccccc'
 
     ascii_character = chr(ord(letters_list[-1]) + 1)
-    
+
     gdb.sendline(argvs)
     gdb.recvlines(timeout=time_out)
 
@@ -74,9 +74,13 @@ def destruction_phase(executable, functs_dict):
     gdb.sendline('run')
     print_stdout(gdb.recvlines(timeout=time_out))
 
+    gdb.sendline('c')
+    print_stdout(gdb.recvlines(timeout=time_out))
+
+
     #break_it(gdb)
 
-    
+
     gdb.close()
 
 
