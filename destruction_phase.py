@@ -33,10 +33,7 @@ def break_it(gdb):
         print('c')
         gdb.sendline('c')
         print_stdout(gdb.recvlines(timeout=time_out))
-        if (dict_of_bkpnts[str(i)][2] == 'scanf') or (dict_of_bkpnts[str(i)][2] == 'gets'):
-            x = input()
-            gdb.sendline(x*9)
-            print_stdout(gdb.recvlines(timeout=time_out))
+
 
 def set_argvs(letters_list, argv_len, gdb):
 
@@ -73,12 +70,6 @@ def destruction_phase(executable, functs_dict):
 
     gdb.sendline('run')
     print_stdout(gdb.recvlines(timeout=time_out))
-
-    gdb.sendline('c')
-    print_stdout(gdb.recvlines(timeout=time_out))
-
-
-    #break_it(gdb)
 
 
     gdb.close()
