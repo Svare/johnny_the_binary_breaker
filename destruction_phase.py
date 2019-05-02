@@ -59,6 +59,9 @@ def break_it(gdb):
 
         if detect_buffer_overflow(resp):
             return resp
+
+        print_stdout(resp)
+
         bk = resp[2].decode('utf-8').split()[1].replace(',','')
         #print("Break -->  " + bk )
         identif = get_destination_var(resp[3].decode('utf-8'))
@@ -67,7 +70,7 @@ def break_it(gdb):
         #print(origin)
         gdb.sendline('x/x {}'.format(origin))
         resp = gdb.recvlines(timeout=time_out)
-        #print_stdout(resp)
+        print_stdout(resp) ####################################################
         valuee = resp[0].decode('utf-8').split()[2]
         #print(valuee)
         gdb.sendline('p &{}'.format(identif))
@@ -81,11 +84,11 @@ def break_it(gdb):
 
 def set_argvs(letters_list, argv_len, gdb):
 
+    argvs = 'r' + reduce(lambda x,y: x + y, map(lambda x: ' ' + x*argv_len, letters_list))
+    
+    # con
     # letters_list = ['a', 'b', 'c']
     # argv_len = 5
-
-    argvs = 'r' + reduce(lambda x,y: x + y, map(lambda x: ' ' + x*argv_len, letters_list))
-
     # argvs generaria 'r aaaaa bbbbb ccccc'
 
     ascii_character = chr(ord(letters_list[-1]) + 1)
@@ -93,11 +96,12 @@ def set_argvs(letters_list, argv_len, gdb):
     gdb.sendline(argvs)
     gdb.recvlines(timeout=time_out)
 
-
 #funcion general que realiza la fase de destruccion
 def destruction_phase(executable, functs_dict):
     gdb = exec_gdb(executable)
     gdb.recvlines(timeout=time_out)
+
+    print('todo bien')
 
     gdb.sendline('set height unlimited')
     gdb.recvlines(timeout=time_out)
@@ -125,15 +129,11 @@ def destruction_phase(executable, functs_dict):
             print("El programa no es vulnerable")
             sys.exit(0)
 
-
-
     gdb.close()
 
     return dict_of_bkpnts[last]
 
-
 if __name__ == '__main__':
-    d = {'main': [('strcpy', '+25'), ('strcpy', '+49'), ('strcpy', '+73'), ('strcpy', '+97'), ('strcpy', '+121')]}
-    print(destruction_phase('../x.out',d))
-    #print('Va')
-    #print(dict_of_bkpnts)
+    d = {'main': [('strcpy', '+25')]}
+    print(destruction_phase('./buffer_overflow', d))
+    print(dict_of_bkpnts)

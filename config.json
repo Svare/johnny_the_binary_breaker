@@ -1,10 +1,11 @@
 {
 	"verbose": false,
 	"hardcoded": false,
+	"vulnerable_funcs": false,
 	"harcoded_exts": [".c", ".h"],
 	"dirs_paths" : ["/root/Documents/dnstracer-1.8"],
-	"main_file" : "/root/Documents/dnstracer-1.8/dnstracer.c",
+	"main_file" : "/root/poc/bo.c",
 	"make_path" : "/root/Documents/dnstracer-1.8",
 	"gcc_main_path" : null,
-	"binary_path" : "/root/Documents/dnstracer-1.8/dnstracer"
+	"binary_path" : "/root/poc/bo"
 }

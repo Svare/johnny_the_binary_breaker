@@ -42,6 +42,7 @@ def map_functions(gdb , funtions_dict):
         asm_funct_call[fun] = []
         gdb.sendline('disass {}'.format(fun))
         lines = gdb.recvlines(timeout=time_out)
+        print_stdout(lines)
 
         #print('-------------------------------------------------')
         #print_stdout(lines)
