@@ -1,16 +1,22 @@
 #!/usr/bin/python3
 
-from pwn import *
-time_out = 0.1
+import subprocess
 
-def get_break_point(info_list):
+#time_out = 0.1
 
-    chars = 10000
-    argv_num = info_list[6].split('[')[1].split(']')[0].strip()
+def get_breakpoint(info_list, binary_path):
+	
+	# info_list : ['main', '+25', 'strcpy', '5.', 'buffer', '0xffffc4a0', 'argv[1]', '0x61616161']
+	# argv_num : 1
+
+    chars = 10000 # Valor Maximo a Probar
+    argv_num = info_list[-2].split('[')[1].split(']')[0].strip() # argv[#] con overflow
     
+	# Busqueda Binaria
+
     while(True):
 
-        process_args = ['/root/poc/argv']
+        process_args = [binary_path]
     
         for i in range(int(argv_num)):
             if i+1 == int(argv_num):
@@ -18,16 +24,18 @@ def get_break_point(info_list):
             else:
                 process_args.append('a')
 
-        res = subprocess.run(process_args, capture_output=True)
+        res = subprocess.run(process_args)
         
         if res.returncode == -11:
             chars = chars // 2
         else:
             break
+
+	# Ya que llege a un valor cercano con busqueda binaria me voy acercando de uno en uno
     
     while(True):
 
-        process_args = ['/root/poc/argv']
+        process_args = [binary_path]
     
         for i in range(int(argv_num)):
             if i+1 == int(argv_num):
@@ -35,14 +43,14 @@ def get_break_point(info_list):
             else:
                 process_args.append('a')
 
-        res = subprocess.run(process_args, capture_output=True)
+        res = subprocess.run(process_args)
 
         if res.returncode == -11:
-             print(chars)
+             return chars
              break
         else:
             chars+=1
 
 if __name__ == '__main__':
 
-    get_break_point([0, 1, 2, 3, 4, 5, ' argv[ 2 ] '])
+    print(get_breakpoint(['main', '+25', 'strcpy', '5.', 'buffer', '0xffffc4a0', 'argv[1]', '0x61616161'], '/home/ginger/poc/overflow'))

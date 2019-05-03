@@ -169,7 +169,7 @@ def get_buffer_overflow_funcs(functions_calls_per_function):
     temp_funcs = []
 
     #vulnerable = ('scanf', 'gets', 'strcpy', 'strncpy')
-    vulnerable = ('strcpy')
+    vulnerable = ('strcpy', 'scanf', 'gets')
 
     for func, calls_list in functions_calls_per_function.items():
         for name, args in calls_list:

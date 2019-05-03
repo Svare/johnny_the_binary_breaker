@@ -2,7 +2,7 @@
 from pwn import *
 
 #functs_vulns =['gets','strcpy','scanf','strncpy']
-functs_vulns =['strcpy']
+functs_vulns =['strcpy', 'scanf', 'gets']
 asm_funct_call = {}
 time_out = 0.1
 

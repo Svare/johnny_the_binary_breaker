@@ -98,19 +98,18 @@ def get_harcoded_data(files, json_config):
     
     return log, MAX_INT
 
-def get_main_arg(file_chars):
+def get_argv(file_chars):
 
-    # Obtencion del nombre de los argumentos pasados por linea de comandos
+    ''' Obtiene el nombre del arreglo que se pasa por consola en el archivo que generalmente es argv.
+        Recibe como parametro los caracteres del archivo que conteiene la funcion main. '''
 
-    main = re.compile('main\s*\(\s*.*char\s*(?:\*\s*([a-zA-Z_][a-zA-Z0-9_]*)\s*\[\s*\]|\*\s*\*\s*([a-zA-Z_][a-zA-Z0-9_]*))[^)]*\)')
-    result = re.search(main, file_chars)
+    main = re.compile(r'main\s*\(([^)]*)\)')
+    name = re.compile(r'([a-zA-Z_][a-zA-Z0-9_]*)')
 
-    if result is not None:
-        main_arg = result.groups()[0] if (result.groups()[0] is not None) else result.groups()[1]
-    else:
-        main_arg = 'argv'
-    
-    return main_arg
+    result = re.findall(main, file_chars)
+    result = result[0].split(',')[1].strip().split()[-1]
+
+    return re.search(name, result).groups()[0].strip()
 
 def print_harcoded_data(log):
 
