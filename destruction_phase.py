@@ -57,7 +57,8 @@ def detect_buffer_overflow(lines):
         line = line.decode('utf-8')
         #print('----- >' + line)
         if 'Segmentation fault' in line:
-            return True
+            return chr(int(lines[-1].decode('utf-8').split()[0][-2:],16))
+            #return True
     return False
 
 def break_it(gdb):
@@ -112,7 +113,7 @@ def break_it_(gdb):
     gdb.sendline('c') # Avanzar del breakpoint del main
 
     for i in dict_of_bkpnts.keys():
-        
+
         resp = gdb.recvlines(timeout=time_out)
         print(raw_to_str(resp))
         bk = resp[-2].decode('utf-8').split()[1].replace(',', '') # Numero de breakpoint (indice de nuestro diccionario)
@@ -136,17 +137,16 @@ def break_it_(gdb):
 
             ascii_character = chr(ord(ascii_character) + 1)
             dict_of_bkpnts[bk].extend([destination, memory_address, argv, break_vector])
-            
-            gdb.sendline('c')
-            gdb.sendline(ascii_character*10)
 
-            last = bk
+            gdb.sendline('c')
+            gdb.sendline(ascii_character*5000)
+
 
         elif(dict_of_bkpnts[bk][2] == 'gets'):
             print('gets')
 
         elif(dict_of_bkpnts[bk][2] == 'strcpy'):
-            
+
             raw = raw_to_str(resp).split('\n')
             destination = n_argument(0, raw[-1])
 
@@ -165,15 +165,15 @@ def break_it_(gdb):
             break_vector = chr(int(raw[-1][-2:], 16))
 
             dict_of_bkpnts[bk].extend([destination, memory_address, argv, break_vector])
-            
+
             gdb.sendline('c')
-            
-            last = bk
-    
+
+        return False
+
 def set_argvs(letters_list, argv_len, gdb):
 
     argvs = 'r' + reduce(lambda x,y: x + y, map(lambda x: ' ' + x*argv_len, letters_list))
-    
+
     # con
     # letters_list = ['a', 'b', 'c']
     # argv_len = 5
@@ -207,17 +207,33 @@ def destruction_phase(executable, functs_dict):
     gdb.recvlines(timeout=time_out)
 
     resp = break_it_(gdb)
+    resp = gdb.recvlines(timeout=time_out)
+    caracter = detect_buffer_overflow(resp)
+    if not caracter:
+        print("El programa no es vulnerable")
+        sys.exit(0)
+    else:
+        print("El programa es vulnerable")
+    #gdb.sendline('run')
+    #print(gdb.recvlines(timeout=time_out))
 
+    for key in dict_of_bkpnts.keys():
+        if caracter == dict_of_bkpnts[key][-1]:
+            resp = dict_of_bkpnts[key]
+
+
+    """
     if not resp:
         gdb.sendline('c')
         resp = gdb.recvlines(timeout=time_out)
         if not detect_buffer_overflow(resp):
             print("El programa no es vulnerable")
             sys.exit(0)
+    """
 
     gdb.close()
 
-    return dict_of_bkpnts[last]
+    return resp
 
 if __name__ == '__main__':
     d = {'main': [('strcpy', '+25')]}

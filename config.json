@@ -4,8 +4,8 @@
 	"vulnerable_funcs": false,
 	"harcoded_exts": [".c", ".h"],
 	"dirs_paths" : ["/root/Documents/dnstracer-1.8"],
-	"main_file" : "/home/ginger/main.c",
+	"main_file" : "/root/Documents/proy/x.c",
 	"make_path" : "/root/Documents/dnstracer-1.8",
 	"gcc_main_path" : null,
-	"binary_path" : "/home/ginger/main"
+	"binary_path" : "/root/Documents/proy/aa"
 }
